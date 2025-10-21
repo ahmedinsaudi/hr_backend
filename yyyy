@@ -1,0 +1,70 @@
+
+
+#### Financial Reports (Leveraging `JournalEntry` and `Account`)
+
+* **Income Statement (Profit & Loss Statement):**
+    * **How:** Sum `Debit` and `Credit` for `Revenue` and `Expense` accounts within a period from `JournalEntryLine`. Group by `AccountType` and `Account`.
+    * **Insights:** Shows profitability over time.
+* **Balance Sheet:**
+    * **How:** Sum `Debit` and `Credit` for `Asset`, `Liability`, and `Equity` accounts up to a specific date from `JournalEntryLine`.
+    * **Insights:** Snapshot of financial health at a point in time.
+* **Cash Flow Statement:**
+    * **How:** Categorize `JournalEntry` types (e.g., Sale, Payment, Purchase) and aggregate `TransactionAmount` to show cash inflows and outflows from operating, investing, and financing activities.
+    * **Insights:** Shows how cash is generated and used.
+* **Trial Balance:**
+    * **How:** Sum all `Debit` and `Credit` entries for each `Account` for a period. Total Debits should equal total Credits.
+    * **Insights:** Verifies the mathematical equality of debits and credits and serves as a precursor to financial statements.
+* **Account Ledgers:**
+    * **How:** Filter `JournalEntryLine` by `AccountID` to see all transactions affecting a specific account.
+    * **Insights:** Detailed view of each account's activity.
+
+#### Sales & Profitability Reports (Leveraging `Invoice`, `InvoiceItem`, `Product`, `Promotion`)
+
+* **Sales by Category:**
+    * **How:** Join `InvoiceItem` with `Product` and `Category`. Aggregate `Subtotal` or `FinalPrice` by `Category.Name`.
+    * **Insights:** Identifies top-performing product categories.
+* **Sales by Employee/Cashier:**
+    * **How:** Aggregate `Invoice.FinalAmount` by `Invoice.UserID` (linking to `User` and `Employee`).
+    * **Insights:** Tracks individual employee performance and sales contributions.
+* **Sales by Branch:**
+    * **How:** Aggregate `Invoice.FinalAmount` by `Invoice.BranchID`.
+    * **Insights:** Compares performance across different branches.
+* **Discount Effectiveness Report:**
+    * **How:** Aggregate `AppliedDiscount.Amount` by `PromotionID` and `DiscountRuleID`. Compare with `Invoice.TotalAmount` to see the impact. Track `Invoice.PotentialDiscountLoss` and `InvoiceItem.OriginalProfitPerItem` vs `RealizedProfitPerItem`.
+    * **Insights:** Evaluates which promotions are most used, their cost, and their actual impact on profit.
+* **Top/Bottom Selling Products (by Quantity/Revenue/Profit):**
+    * **How:** Aggregate `InvoiceItem.Quantity`, `InvoiceItem.FinalPrice`, and calculate `InvoiceItem.RealizedProfitPerItem` for each `ProductID`.
+    * **Insights:** Identifies best-sellers and underperformers.
+* **Average Transaction Value (ATV) / Average Items Per Transaction (AIPT):**
+    * **How:** ATV: `SUM(Invoice.FinalAmount) / COUNT(Invoice.ID)`. AIPT: `SUM(InvoiceItem.Quantity) / COUNT(DISTINCT InvoiceItem.InvoiceID)`.
+    * **Insights:** Helps understand customer purchasing habits.
+
+#### Inventory Management Reports (Leveraging `Inventory`, `StockMovement`, `Waste`)
+
+* **Current Stock Levels:**
+    * **How:** Query `Inventory` table directly.
+    * **Insights:** Real-time view of what's available.
+* **Stock Movement History:**
+    * **How:** Filter `StockMovement` by `ProductID` or `BranchID`.
+    * **Insights:** Understands inflow and outflow of stock over time.
+* **Low Stock Alerts:**
+    * **How:** Query `Inventory` where `Quantity <= MinimumStockLevel`.
+    * **Insights:** Proactive alerts for restocking.
+* **Waste Analysis:**
+    * **How:** Aggregate `Waste` by `Reason`, `ProductID`, or `BranchID`.
+    * **Insights:** Identifies sources of waste and their financial impact.
+* **Inventory Turnover Ratio:**
+    * **How:** (Cost of Goods Sold / Average Inventory). Cost of Goods Sold can be derived from `InvoiceItem.ProductCost` aggregated for sold items. Average Inventory from `Inventory` snapshots or aggregated `StockMovement`.
+    * **Insights:** How quickly inventory is sold and replaced.
+
+#### Customer & Loyalty Reports (Leveraging `User`, `CustomerSegment`)
+
+* **Customer Segmentation Analysis:**
+    * **How:** Group `User` (where `UserType = 'customer'`) by `CustomerSegment` and analyze their purchasing behavior.
+    * **Insights:** Understands different customer groups and their value.
+* **Loyalty Points Earned/Redeemed:**
+    * **How:** Track changes in `User.LoyaltyPoints` or create dedicated transactions for loyalty.
+    * **Insights:** Measures engagement with the loyalty program.
+* **New vs. Returning Customers:**
+    * **How:** Compare `User.CreatedAt` with subsequent `Invoice.CreatedAt` for `CustomerID`.
+    * **Insights:** Gauges customer acquisition and retention.

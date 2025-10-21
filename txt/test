@@ -1,0 +1,9 @@
+curl -X POST http://localhost:8080/branch -H "Content-Type: application/json" -d '{"name":"value1"}'
+
+شكل الخطا
+Invoke-RestMethod : Method Not Allowed
+
+
+Invoke-RestMethod -Uri http://localhost:8080/branch -Method POST -Body '{"name":"value1"}' -ContentType "application/json"
+
+

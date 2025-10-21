@@ -1,0 +1,116 @@
+services:
+  app:
+    image: ghcr.io/ahmedinsaudi/doneallyback:latest
+    restart: unless-stopped
+    working_dir: /app
+    env_file: .env
+    expose:
+      - "8080"
+    environment:
+      # - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}?sslmode=disable
+      - VIRTUAL_HOST=doneally.com,www.doneally.com,dev.doneally.com
+      - VIRTUAL_PORT=8080
+      - VIRTUAL_PROTO=http
+      # - LETSENCRYPT_HOST=doneally.com,www.doneally.com,dev.doneally.com
+      # - LETSENCRYPT_EMAIL=admin@doneally.com
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - ./migrations:/migrations
+      - ./application_logs:/app/application_logs
+      - ./public/images:/app/public/images
+    # command: sh -c "goose -dir /migrations postgres \"$DATABASE_URL\" up && /usr/local/bin/go-fiber-app"
+
+  db:
+    image: postgres:15.5-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: "--auth-host=md5 --encoding=UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - ./migrations:/migrations
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # test: ["CMD-SHELL", "pg_isready -U postgres -d $POSTGRES_DB"]
+      # test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d $${POSTGRES_DB} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - backend
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    restart: always
+    # env_file: .env
+    environment:
+      AUTH_TYPE: md5
+      DB_HOST: db 
+      DB_NAME: ${POSTGRES_DB} 
+      DB_USER: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      PGBOUNCER_MAX_CLIENT_CONN: 1000
+      PGBOUNCER_DEFAULT_POOL_SIZE: 20
+    depends_on:
+      db:
+          condition: service_healthy
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432"] 
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - frontend
+      - backend
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    restart: unless-stopped
+    environment:
+      NGINX_PROXY_CONTAINER: myapp-nginx-proxy-1
+      DEFAULT_EMAIL: admin@doneally.com
+      DISABLE_VIRTUAL_HOST: "true" 
+      
+    volumes:
+      - ./certs:/etc/nginx/certs
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      
+    depends_on:
+      nginx-proxy:
+        condition: service_started
+    networks:
+      - frontend
+
+  
+volumes:
+  pgdata:
+
+networks:
+  frontend:
+  backend:

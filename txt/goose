@@ -1,0 +1,21 @@
+goose -dir migrations create create_users_table sql
+
+goose create add_users_table sql
+
+goose up
+
+goose down
+
+----------------- for run migration inside 
+goose -dir ./migrations postgres "user=postgres dbname=mydb sslmode=disable" up
+
+goose -dir migrations postgres "user=postgres dbname=mydb sslmode=disable" up
+
+
+goose -dir migrations postgres "user=postgres dbname=mydb sslmode=disable" up
+
+postgres://postgres:1234@localhost:5330/go
+
+/////////   this for correct migrate
+goose -dir migrations postgres "host=localhost port=5432 user=postgres password=1234 dbname=hr sslmode=disable" up
+

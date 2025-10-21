@@ -1,0 +1,46 @@
+-- Clean tables (optional, if you want fresh data)
+TRUNCATE hr_experience, hr_job_roles, badges, rates, rate_likes, badge_likes, employees, hr_profiles RESTART IDENTITY CASCADE;
+
+-- Insert into hr_profiles with explicit id
+INSERT INTO hr_profiles (id, name, email, password_hash, company_name, job_position, rate, total_rates_count, verified_profile)
+VALUES 
+(1, 'John Doe', 'john.doe@example.com', 'hashedpassword123', 'Acme Corp', 'HR Manager', 5.0, 20, TRUE),
+(2, 'Jane Smith', 'jane.smith@example.com', 'hashedpassword456', 'Beta Ltd', 'Recruiter', 5.0, 18, FALSE);
+
+-- Now you can safely reference hr_profile_id = 1 and 2 below:
+
+INSERT INTO hr_experience (hr_profile_id, name, start_date, end_date, job_position)
+VALUES
+(1, 'Acme Corp', '2015-01-01', '2018-12-31', 'Junior HR Specialist'),
+(1, 'Acme Corp', '2019-01-01', NULL, 'HR Manager'),
+(2, 'Beta Ltd', '2017-06-01', NULL, 'Recruiter');
+
+INSERT INTO hr_job_roles (hr_profile_id, name, role_description, start_date, done_rate, visible)
+VALUES
+(1, 'Talent Acquisition', 'Responsible for hiring processes', '2019-01-01', 90, TRUE),
+(2, 'Employee Relations', 'Handling staff grievances', '2017-06-01', 75, TRUE);
+
+INSERT INTO employees (id, name, job_field, address, city, email, password_hash, active_points, is_verified)
+VALUES
+(1, 'Alice Johnson', 'Marketing', '123 Main St', 'New York', 'alice.johnson@example.com', 'hashedpass789', TRUE, TRUE),
+(2, 'Bob Brown', 'Sales', '456 Elm St', 'Los Angeles', 'bob.brown@example.com', 'hashedpass101', FALSE, FALSE);
+
+INSERT INTO badges (hr_profile_id, created_date, total_rates_number, rate, job_position, current_job_roles)
+VALUES
+(1, '2024-01-01', 25, 5.0, 'HR Manager', 'Talent Acquisition'),
+(2, '2024-02-15', 20, 5.0, 'Recruiter', 'Employee Relations');
+
+INSERT INTO rates (hr_profile_id, employee_id, review_text, rate_value, rating_context, likes_count, is_verified, hr_response, is_anonymous)
+VALUES
+(1, 1, 'Great communication skills and teamwork.', 5.0, 'Annual review', 15, TRUE, 'Thank you!', FALSE),
+(2, 2, 'Needs improvement in time management.', 4.2, 'Quarterly review', 12, FALSE, NULL, TRUE);
+
+INSERT INTO rate_likes (rate_id, employee_id, is_like)
+VALUES
+(1, 2, TRUE),
+(2, 1, FALSE);
+
+INSERT INTO badge_likes (badge_id, employee_id, is_like)
+VALUES
+(1, 1, TRUE),
+(2, 2, TRUE);

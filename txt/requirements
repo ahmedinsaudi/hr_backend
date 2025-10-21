@@ -1,0 +1,17 @@
+Company
+User
+Employee
+Product
+Invoice
+Payment
+CreditNote
+Account
+JournalEntry
+JournalEntryLine
+Promotion
+DiscountRule
+DiscountRuleProduct
+CustomerSegment
+AppliedDiscount
+FreeOfferRule
+CustomerBehavior
