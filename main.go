@@ -2,12 +2,12 @@ package main
 
 import (
 	myfiber "githup.ahmedramadan.4cashier/internal/api"
-	"githup.ahmedramadan.4cashier/internal/bootstrap"
+	// "githup.ahmedramadan.4cashier/internal/bootstrap"
 	mylogger "githup.ahmedramadan.4cashier/internal/mylogger"
 )
 
 func main() {
-	bootstrap.LoadEnv()
+	// bootstrap.LoadEnv()
 
 	logConfig := mylogger.LogConfig{
 		ConsoleLoggingEnabled: true,               // Enable logging to console
